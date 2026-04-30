@@ -1,67 +1,68 @@
 import express from "express";
-import path from "path";
-import fs from "fs";
-import { fileURLToPath } from "url";
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+import User from "../models/user.js";
 
 const router = express.Router();
 
-router.get("/:id", (req, res) => {
-  const { id } = req.params;
-
-  fs.readFile(
-    path.join(__dirname, "../data", "users.json"),
-    "utf-8",
-    (err, data) => {
-      if (err) {
-        return res.status(500).send({
-          message: "Ha ocurrido un error en el servidor",
-        });
-      }
-
-      try {
-        const users = JSON.parse(data);
-
-        const user = users.find((user) => user._id === id);
-
-        if (!user) {
-          return res.status(404).send({
-            message: "ID de usuario no encontrado",
-          });
-        }
-
-        return res.send(user);
-      } catch (error) {
-        return res.status(500).send({
-          message: "Ha ocurrido un error en el servidor",
-        });
-      }
-    },
-  );
+// GET todos los usuarios
+router.get("/", (req, res) => {
+  User.find({})
+    .then((users) => res.send(users))
+    .catch(() => res.status(500).send({ message: "Error en servidor" }));
 });
 
-router.get("/", (req, res) => {
-  fs.readFile(
-    path.join(__dirname, "../data", "users.json"),
-    "utf-8",
-    (err, data) => {
-      if (err) {
-        return res.status(500).send({
-          message: "Ha ocurrido un error en el servidor",
-        });
+// GET usuario por id
+router.get("/:id", (req, res) => {
+  User.findById(req.params.id)
+    .orFail()
+    .then((user) => res.send(user))
+    .catch((err) => {
+      if (err.name === "DocumentNotFoundError") {
+        return res.status(404).send({ message: "Usuario no encontrado" });
       }
+      res.status(500).send({ message: "Error en servidor" });
+    });
+});
+router.patch("/me", (req, res) => {
+  const { name, about } = req.body;
 
-      try {
-        const users = JSON.parse(data);
-        return res.send(users);
-      } catch (error) {
-        return res.status(500).send({
-          message: "Ha ocurrido un error en el servidor",
-        });
+  User.findByIdAndUpdate(
+    req.user._id,
+    { name, about },
+    { new: true, runValidators: true },
+  )
+    .orFail()
+    .then((user) => res.send(user))
+    .catch((err) => {
+      if (err.name === "ValidationError") {
+        return res.status(400).send({ message: "Datos inválidos" });
       }
-    },
-  );
+      if (err.name === "DocumentNotFoundError") {
+        return res.status(404).send({ message: "Usuario no encontrado" });
+      }
+      res.status(500).send({ message: "Error en servidor" });
+    });
+});
+
+// PATCH avatar
+router.patch("/me/avatar", (req, res) => {
+  const { avatar } = req.body;
+
+  User.findByIdAndUpdate(
+    req.user._id,
+    { avatar },
+    { new: true, runValidators: true },
+  )
+    .orFail()
+    .then((user) => res.send(user))
+    .catch((err) => {
+      if (err.name === "ValidationError") {
+        return res.status(400).send({ message: "URL inválida" });
+      }
+      if (err.name === "DocumentNotFoundError") {
+        return res.status(404).send({ message: "Usuario no encontrado" });
+      }
+      res.status(500).send({ message: "Error en servidor" });
+    });
 });
 
 export default router;
