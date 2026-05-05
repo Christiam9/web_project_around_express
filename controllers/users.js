@@ -20,7 +20,6 @@ export const getUserById = (req, res) => {
     });
 };
 
-// POST crear usuario (ESTO ES LO QUE TE PIDEN)
 export const createUser = (req, res) => {
   const { name, about, avatar } = req.body;
 
