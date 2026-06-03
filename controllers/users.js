@@ -2,26 +2,21 @@ import User from "../models/user.js";
 import bcrypt from "bcryptjs";
 
 // GET todos los usuarios
-export const getUsers = (req, res) => {
+export const getUsers = (req, res, next) => {
   User.find({})
     .then((users) => res.send(users))
-    .catch(() => res.status(500).send({ message: "Error en servidor" }));
+    .catch(next);
 };
 
 // GET usuario por id
-export const getUserById = (req, res) => {
+export const getUserById = (req, res, next) => {
   User.findById(req.params.id)
     .orFail()
     .then((user) => res.send(user))
-    .catch((err) => {
-      if (err.name === "DocumentNotFoundError") {
-        return res.status(404).send({ message: "Usuario no encontrado" });
-      }
-      res.status(500).send({ message: "Error en servidor" });
-    });
+    .catch(next);
 };
 
-export const createUser = (req, res) => {
+export const createUser = (req, res, next) => {
   const { name, about, avatar, email, password } = req.body;
 
   bcrypt
@@ -43,16 +38,11 @@ export const createUser = (req, res) => {
         email: user.email,
       });
     })
-    .catch((err) => {
-      if (err.name === "ValidationError") {
-        return res.status(400).send({ message: "Datos inválidos" });
-      }
-      res.status(500).send({ message: "Error en servidor" });
-    });
+    .catch(next);
 };
 
 // PATCH perfil
-export const updateProfile = (req, res) => {
+export const updateProfile = (req, res, next) => {
   const { name, about } = req.body;
 
   User.findByIdAndUpdate(
@@ -62,19 +52,11 @@ export const updateProfile = (req, res) => {
   )
     .orFail()
     .then((user) => res.send(user))
-    .catch((err) => {
-      if (err.name === "ValidationError") {
-        return res.status(400).send({ message: "Datos inválidos" });
-      }
-      if (err.name === "DocumentNotFoundError") {
-        return res.status(404).send({ message: "Usuario no encontrado" });
-      }
-      res.status(500).send({ message: "Error en servidor" });
-    });
+    .catch(next);
 };
 
 // PATCH avatar
-export const updateAvatar = (req, res) => {
+export const updateAvatar = (req, res, next) => {
   const { avatar } = req.body;
 
   User.findByIdAndUpdate(
@@ -84,13 +66,12 @@ export const updateAvatar = (req, res) => {
   )
     .orFail()
     .then((user) => res.send(user))
-    .catch((err) => {
-      if (err.name === "ValidationError") {
-        return res.status(400).send({ message: "URL inválida" });
-      }
-      if (err.name === "DocumentNotFoundError") {
-        return res.status(404).send({ message: "Usuario no encontrado" });
-      }
-      res.status(500).send({ message: "Error en servidor" });
-    });
+    .catch(next);
+};
+
+export const getCurrentUser = (req, res, next) => {
+  User.findById(req.user._id)
+    .orFail()
+    .then((user) => res.send(user))
+    .catch(next);
 };

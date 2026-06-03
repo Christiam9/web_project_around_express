@@ -6,14 +6,12 @@ import {
   updateProfile,
   updateAvatar,
 } from "../controllers/users.js";
+import { getCurrentUser } from "../controllers/users.js";
 
 const router = express.Router();
 
 router.get("/", getUsers);
-router.get("/me", (req, res, next) => {
-  req.params.id = req.user._id;
-  return getUserById(req, res, next);
-});
+router.get("/me", getCurrentUser);
 router.get("/:id", getUserById);
 router.post("/", createUser);
 router.patch("/me", updateProfile);

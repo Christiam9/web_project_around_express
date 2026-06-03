@@ -2,7 +2,7 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import User from "../models/user.js";
 
-export const register = (req, res) => {
+export const register = (req, res, next) => {
   const { name, about, avatar, email, password } = req.body;
 
   bcrypt
@@ -24,12 +24,10 @@ export const register = (req, res) => {
         email: user.email,
       });
     })
-    .catch((err) => {
-      res.status(500).send({ message: err.message });
-    });
+    .catch(next);
 };
 
-export const login = (req, res) => {
+export const login = (req, res, next) => {
   const { email, password } = req.body;
 
   User.findOne({ email })
@@ -55,7 +53,5 @@ export const login = (req, res) => {
         return res.send({ token });
       });
     })
-    .catch((err) => {
-      res.status(500).send({ message: err.message });
-    });
+    .catch(next);
 };

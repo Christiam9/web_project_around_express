@@ -4,6 +4,7 @@ import mongoose from "mongoose";
 import dotenv from "dotenv";
 import cors from "cors";
 import auth from "./middlewares/auth.js";
+import errorHandler from "./middlewares/errorHandler.js";
 
 import usersRoutes from "./routes/users.js";
 import cardsRoutes from "./routes/cards.js";
@@ -37,6 +38,8 @@ app.use("/cards", cardsRoutes);
 app.use((req, res) => {
   res.status(404).send({ message: "Recurso no encontrado" });
 });
+
+app.use(errorHandler);
 
 const PORT = process.env.PORT || 3000;
 

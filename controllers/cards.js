@@ -1,14 +1,14 @@
 import Card from "../models/card.js";
 
 // GET cards
-export const getCards = (req, res) => {
+export const getCards = (req, res, next) => {
   Card.find({})
     .then((cards) => res.send(cards))
-    .catch(() => res.status(500).send({ message: "Error en servidor" }));
+    .catch(next);
 };
 
 // POST card
-export const createCard = (req, res) => {
+export const createCard = (req, res, next) => {
   const { name, link } = req.body;
 
   Card.create({
@@ -17,20 +17,15 @@ export const createCard = (req, res) => {
     owner: req.user._id,
   })
     .then((card) => res.status(201).send(card))
-    .catch((err) => {
-      if (err.name === "ValidationError") {
-        return res.status(400).send({ message: "Datos inválidos" });
-      }
-      res.status(500).send({ message: "Error en servidor" });
-    });
+    .catch(next);
 };
 
 // DELETE card
-export const deleteCard = (req, res) => {
+export const deleteCard = (req, res, next) => {
   Card.findById(req.params.cardId)
     .orFail()
     .then((card) => {
-      if (card.owner.toString() !== req.user._id) {
+      if (card.owner.toString() !== req.user._id.toString()) {
         return res.status(403).send({ message: "No autorizado" });
       }
 
@@ -38,16 +33,11 @@ export const deleteCard = (req, res) => {
         res.send({ message: "Tarjeta eliminada" }),
       );
     })
-    .catch((err) => {
-      if (err.name === "DocumentNotFoundError") {
-        return res.status(404).send({ message: "Tarjeta no encontrada" });
-      }
-      res.status(500).send({ message: "Error en servidor" });
-    });
+    .catch(next);
 };
 
 // LIKE
-export const likeCard = (req, res) => {
+export const likeCard = (req, res, next) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
     { $addToSet: { likes: req.user._id } },
@@ -55,16 +45,11 @@ export const likeCard = (req, res) => {
   )
     .orFail()
     .then((card) => res.send(card))
-    .catch((err) => {
-      if (err.name === "DocumentNotFoundError") {
-        return res.status(404).send({ message: "Tarjeta no encontrada" });
-      }
-      res.status(500).send({ message: "Error en servidor" });
-    });
+    .catch(next);
 };
 
 // DISLIKE
-export const dislikeCard = (req, res) => {
+export const dislikeCard = (req, res, next) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
     { $pull: { likes: req.user._id } },
@@ -72,10 +57,5 @@ export const dislikeCard = (req, res) => {
   )
     .orFail()
     .then((card) => res.send(card))
-    .catch((err) => {
-      if (err.name === "DocumentNotFoundError") {
-        return res.status(404).send({ message: "Tarjeta no encontrada" });
-      }
-      res.status(500).send({ message: "Error en servidor" });
-    });
+    .catch(next);
 };
