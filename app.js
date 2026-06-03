@@ -5,6 +5,8 @@ import dotenv from "dotenv";
 import cors from "cors";
 import auth from "./middlewares/auth.js";
 import errorHandler from "./middlewares/errorHandler.js";
+import { errors } from "celebrate";
+import logger from "./middlewares/logger.js";
 
 import usersRoutes from "./routes/users.js";
 import cardsRoutes from "./routes/cards.js";
@@ -17,6 +19,16 @@ app.use((req, res, next) => {
   next();
 });
 app.use(cors());
+
+app.use((req, res, next) => {
+  logger.info({
+    method: req.method,
+    url: req.url,
+    time: new Date().toISOString(),
+  });
+
+  next();
+});
 
 app.use(express.json());
 
@@ -33,6 +45,8 @@ app.use(auth);
 
 app.use("/users", usersRoutes);
 app.use("/cards", cardsRoutes);
+
+app.use(errors());
 
 // 404
 app.use((req, res) => {
