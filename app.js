@@ -1,6 +1,9 @@
+import { register, login } from "./controllers/auth.js";
 import express from "express";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
+import cors from "cors";
+import auth from "./middlewares/auth.js";
 
 import usersRoutes from "./routes/users.js";
 import cardsRoutes from "./routes/cards.js";
@@ -8,6 +11,11 @@ import cardsRoutes from "./routes/cards.js";
 dotenv.config();
 
 const app = express();
+app.use((req, res, next) => {
+  console.log("➡️ request:", req.method, req.url);
+  next();
+});
+app.use(cors());
 
 app.use(express.json());
 
@@ -16,14 +24,12 @@ mongoose
   .then(() => console.log("✅ Conectado a MongoDB"))
   .catch((err) => console.error("❌ Error MongoDB:", err));
 
-app.use((req, res, next) => {
-  req.user = {
-    _id: "69f2d32086fc9a29ce91bd7d",
-  };
-  next();
-});
-
 // rutas
+app.post("/signup", register);
+app.post("/signin", login);
+
+app.use(auth);
+
 app.use("/users", usersRoutes);
 app.use("/cards", cardsRoutes);
 

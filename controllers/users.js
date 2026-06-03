@@ -1,4 +1,5 @@
 import User from "../models/user.js";
+import bcrypt from "bcryptjs";
 
 // GET todos los usuarios
 export const getUsers = (req, res) => {
@@ -21,10 +22,27 @@ export const getUserById = (req, res) => {
 };
 
 export const createUser = (req, res) => {
-  const { name, about, avatar } = req.body;
+  const { name, about, avatar, email, password } = req.body;
 
-  User.create({ name, about, avatar })
-    .then((user) => res.status(201).send(user))
+  bcrypt
+    .hash(password, 10)
+    .then((hash) => {
+      return User.create({
+        name,
+        about,
+        avatar,
+        email,
+        password: hash,
+      });
+    })
+    .then((user) => {
+      res.status(201).send({
+        name: user.name,
+        about: user.about,
+        avatar: user.avatar,
+        email: user.email,
+      });
+    })
     .catch((err) => {
       if (err.name === "ValidationError") {
         return res.status(400).send({ message: "Datos inválidos" });

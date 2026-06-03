@@ -1,0 +1,61 @@
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
+import User from "../models/user.js";
+
+export const register = (req, res) => {
+  const { name, about, avatar, email, password } = req.body;
+
+  bcrypt
+    .hash(password, 10)
+    .then((hash) => {
+      return User.create({
+        name,
+        about,
+        avatar,
+        email,
+        password: hash,
+      });
+    })
+    .then((user) => {
+      res.status(201).send({
+        name: user.name,
+        about: user.about,
+        avatar: user.avatar,
+        email: user.email,
+      });
+    })
+    .catch((err) => {
+      res.status(500).send({ message: err.message });
+    });
+};
+
+export const login = (req, res) => {
+  const { email, password } = req.body;
+
+  User.findOne({ email })
+    .select("+password")
+    .then((user) => {
+      if (!user) {
+        return res
+          .status(401)
+          .send({ message: "Email o contraseña incorrectos" });
+      }
+
+      return bcrypt.compare(password, user.password).then((matched) => {
+        if (!matched) {
+          return res
+            .status(401)
+            .send({ message: "Email o contraseña incorrectos" });
+        }
+
+        const token = jwt.sign({ _id: user._id }, "secret-key", {
+          expiresIn: "7d",
+        });
+
+        return res.send({ token });
+      });
+    })
+    .catch((err) => {
+      res.status(500).send({ message: err.message });
+    });
+};

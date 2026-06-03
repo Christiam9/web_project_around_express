@@ -10,6 +10,10 @@ import {
 const router = express.Router();
 
 router.get("/", getUsers);
+router.get("/me", (req, res, next) => {
+  req.params.id = req.user._id;
+  return getUserById(req, res, next);
+});
 router.get("/:id", getUserById);
 router.post("/", createUser);
 router.patch("/me", updateProfile);
