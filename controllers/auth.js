@@ -46,7 +46,7 @@ export const login = (req, res, next) => {
             .send({ message: "Email o contraseña incorrectos" });
         }
 
-        const token = jwt.sign({ _id: user._id }, "secret-key", {
+        const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
           expiresIn: "7d",
         });
 
