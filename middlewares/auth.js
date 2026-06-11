@@ -12,7 +12,7 @@ export default (req, res, next) => {
   let payload;
 
   try {
-    payload = jwt.verify(token, "secret-key");
+    payload = jwt.verify(token, process.env.JWT_SECRET);
   } catch (err) {
     return res.status(403).send({ message: "Token inválido" });
   }

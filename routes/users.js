@@ -9,15 +9,18 @@ import {
 } from "../controllers/users.js";
 
 import { validateUserId } from "../middlewares/validation.js";
+import auth from "../middlewares/auth.js";
 
 const router = express.Router();
 
+// públicas
 router.get("/", getUsers);
-router.get("/me", getCurrentUser);
+router.post("/", createUser);
 router.get("/:id", validateUserId, getUserById);
 
-router.post("/", createUser);
-router.patch("/me", updateProfile);
-router.patch("/me/avatar", updateAvatar);
+// protegidas (REQUIEREN TOKEN)
+router.get("/me", auth, getCurrentUser);
+router.patch("/me", auth, updateProfile);
+router.patch("/me/avatar", auth, updateAvatar);
 
 export default router;
