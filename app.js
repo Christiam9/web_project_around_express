@@ -14,7 +14,13 @@ import cardsRoutes from "./routes/cards.js";
 dotenv.config();
 
 const app = express();
-app.use(cors());
+app.use(
+  cors({
+    origin: "http://34.10.57.82",
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  }),
+);
 
 app.use((req, res, next) => {
   console.log("➡️ request:", req.method, req.url);
