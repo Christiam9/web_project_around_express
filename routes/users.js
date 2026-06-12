@@ -21,6 +21,6 @@ router.get("/me", auth, getCurrentUser);
 router.patch("/me", auth, updateProfile);
 router.patch("/me/avatar", auth, updateAvatar);
 
-router.get("/:id", auth, validateUserId, getUserById);
+router.get("/:id([0-9a-fA-F]{24})", auth, validateUserId, getUserById);
 
 export default router;
