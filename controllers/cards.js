@@ -29,9 +29,9 @@ export const deleteCard = (req, res, next) => {
         return res.status(403).send({ message: "No autorizado" });
       }
 
-      return Card.findByIdAndDelete(req.params.cardId).then(() =>
-        res.send({ message: "Tarjeta eliminada" }),
-      );
+      return card.deleteOne().then(() => {
+        res.send({ message: "Tarjeta eliminada" });
+      });
     })
     .catch(next);
 };

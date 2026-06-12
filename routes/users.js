@@ -16,11 +16,11 @@ const router = express.Router();
 // públicas
 router.get("/", getUsers);
 router.post("/", createUser);
-router.get("/:id", validateUserId, getUserById);
 
-// protegidas (REQUIEREN TOKEN)
 router.get("/me", auth, getCurrentUser);
 router.patch("/me", auth, updateProfile);
 router.patch("/me/avatar", auth, updateAvatar);
+
+router.get("/:id", auth, validateUserId, getUserById);
 
 export default router;
